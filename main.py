@@ -45,16 +45,21 @@ def LengthSelection(G,node):
   return candidate[random.randint(1,len(candidate)) - 1]
 
 def RandAddNode(G,i):
-  G.add_edge(str(i),str(random.randint(0,i)))
-  G.add_edge(str(i),str(random.randint(0,i)))
+  G.add_edge(str(i),str(random.randint(0,200)))
 
 def WeigthAddNode(G,i):
-  G.add_edge(str(i),str(random.randint(0,i)))
   G.add_edge(str(i),str(BasicSelection(G)))
 
 def LengthAddNode(G,i):
-  G.add_edge(str(i),str(random.randint(0,i)))
-  G.add_edge(str(i),str(LengthSelection(G,str(i))))
+  length = nx.single_source_dijkstra_path_length(G,str(i))
+  flag = []
+  for a in length.keys():
+    neigh = G.neighbors(str(i))
+    flag.append(a in neigh)
+  if True in neigh:
+    G.add_edge(str(i),str(LengthSelection(G,str(i))))
+  else:
+    G.add_edge(str(i),str(random.randint(0,200)))
 
 def sort(map):
   ms=sorted(map.iteritems(), key=lambda (k,v): (-v,k))
@@ -70,16 +75,17 @@ weigthCC = [None for a in range(10)]
 lengthCC = [None for a in range(10)]
 
 for a in range(10):
-  randG[a].add_nodes_from(range(1000))
-  weigthG[a].add_nodes_from(range(1000))
-  lengthG[a].add_nodes_from(range(1000))
-  randG[a].add_edges_from([(0,1),(1,2)])
-  weigthG[a].add_edges_from([(0,1),(1,2)])
-  lengthG[a].add_edges_from([(0,1),(1,2)])
+  randG[a].add_nodes_from(range(200))
+  weigthG[a].add_nodes_from(range(200))
+  lengthG[a].add_nodes_from(range(200))
+  for i in range(198):
+    randG[a].add_edges_from([(str(i),str(i+1)),(str(i+1),str(i+2))])
+    weigthG[a].add_edges_from([(str(i),str(i+1)),(str(i+1),str(i+2))])
+    lengthG[a].add_edges_from([(str(i),str(i+1)),(str(i+1),str(i+2))])
 
-  randCC[a] = [[] for row in range(1000)]
-  weigthCC[a] = [[] for row in range(1000)]
-  lengthCC[a] = [[] for row in range(1000)]
+  randCC[a] = [[] for row in range(200)]
+  weigthCC[a] = [[] for row in range(200)]
+  lengthCC[a] = [[] for row in range(200)]
 
   for i in range(3):
     randCC[a][i].append(nx.average_clustering(randG[a]))
@@ -87,7 +93,7 @@ for a in range(10):
     lengthCC[a][i].append(nx.average_clustering(lengthG[a]))
 
 for a in range(10):
-  for i in range(3,1000):
+  for i in range(3,200):
     RandAddNode(randG[a],i)
     WeigthAddNode(weigthG[a],i)
     LengthAddNode(lengthG[a],i)
@@ -99,7 +105,7 @@ rave = []
 wave = []
 lave = []
 
-for a in range(1000):
+for a in range(200):
   add = [0,0,0]
   for i in range(10):
     add[0] = add[0] + float(randCC[i][a][0])
