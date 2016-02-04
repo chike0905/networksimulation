@@ -45,7 +45,7 @@ def LengthSelection(G,node):
   return candidate[random.randint(1,len(candidate)) - 1]
 
 def RandAddNode(G,i):
-  G.add_edge(str(i),str(random.randint(0,200)))
+  G.add_edge(str(i),str(random.randint(0,10)))
 
 def WeigthAddNode(G,i):
   G.add_edge(str(i),str(BasicSelection(G)))
@@ -59,7 +59,7 @@ def LengthAddNode(G,i):
   if True in neigh:
     G.add_edge(str(i),str(LengthSelection(G,str(i))))
   else:
-    G.add_edge(str(i),str(random.randint(0,200)))
+    G.add_edge(str(i),str(random.randint(0,10)))
 
 def sort(map):
   ms=sorted(map.iteritems(), key=lambda (k,v): (-v,k))
@@ -75,44 +75,41 @@ weigthCC = [None for a in range(10)]
 lengthCC = [None for a in range(10)]
 
 for a in range(10):
-  randG[a].add_nodes_from(range(200))
-  weigthG[a].add_nodes_from(range(200))
-  lengthG[a].add_nodes_from(range(200))
-  for i in range(198):
+  for i in range(0,12,3):
     randG[a].add_edges_from([(str(i),str(i+1)),(str(i+1),str(i+2))])
     weigthG[a].add_edges_from([(str(i),str(i+1)),(str(i+1),str(i+2))])
     lengthG[a].add_edges_from([(str(i),str(i+1)),(str(i+1),str(i+2))])
 
-  randCC[a] = [[] for row in range(200)]
-  weigthCC[a] = [[] for row in range(200)]
-  lengthCC[a] = [[] for row in range(200)]
+  randCC[a] = [0.0 for row in range(100)]
+  weigthCC[a] = [0.0 for row in range(100)]
+  lengthCC[a] = [0.0 for row in range(100)]
 
-  for i in range(3):
-    randCC[a][i].append(nx.average_clustering(randG[a]))
-    weigthCC[a][i].append(nx.average_clustering(weigthG[a]))
-    lengthCC[a][i].append(nx.average_clustering(lengthG[a]))
 
-for a in range(10):
-  for i in range(3,200):
-    RandAddNode(randG[a],i)
-    WeigthAddNode(weigthG[a],i)
-    LengthAddNode(lengthG[a],i)
-    randCC[a][i].append(nx.average_clustering(randG[a]))
-    weigthCC[a][i].append(nx.average_clustering(weigthG[a]))
-    lengthCC[a][i].append(nx.average_clustering(lengthG[a]))
+  for i in range(4):
+    randCC[a][i] = nx.average_clustering(randG[a])
+    weigthCC[a][i] = nx.average_clustering(weigthG[a])
+    lengthCC[a][i] = nx.average_clustering(lengthG[a])
 
-rave = []
-wave = []
-lave = []
+for s in range(10):
+  for a in range(10):
+    for i in range(10):
+      row = 10*s + i
+      if row > 3:
+        RandAddNode(randG[a],i)
+        WeigthAddNode(weigthG[a],i)
+        LengthAddNode(lengthG[a],i)
+        randCC[a][row] = nx.average_clustering(randG[a])
+        weigthCC[a][row] = nx.average_clustering(weigthG[a])
+        lengthCC[a][row] = nx.average_clustering(lengthG[a])
 
-for a in range(200):
-  add = [0,0,0]
-  for i in range(10):
-    add[0] = add[0] + float(randCC[i][a][0])
-    add[1] = add[1] + float(weigthCC[i][a][0])
-    add[2] = add[2] + float(lengthCC[i][a][0])
-  rave.append(add[0]/10)
-  wave.append(add[1]/10)
-  lave.append(add[2]/10)
+rave = [0.0 for a in range(len(randCC[0]))]
+wave = [0.0 for a in range(len(randCC[0]))]
+lave = [0.0 for a in range(len(randCC[0]))]
+
+for a in range(len(randCC[0])):
+  for i in range(len(randCC)):
+    rave[a] = (rave[a] + randCC[i][a])/10
+    wave[a] = (wave[a] + weigthCC[i][a])/10
+    lave[a] = (lave[a] + lengthCC[i][a])/10
 
 embed()
